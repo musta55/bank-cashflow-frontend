@@ -24,7 +24,10 @@ export default function App() {
   const [year, setYear] = useState(false);
 
   const handleYear = () => {
-    setOpen(!year);
+    if(year==true)
+    setYear(false);
+    else setYear(true);
+
   };
 
   const handleOpen = () => {
@@ -90,6 +93,7 @@ export default function App() {
 
         setChartData(updatedChartData);
         res = chartData;
+        handleYear();
       })
       .catch(error => {
         console.error('Error:', error);
@@ -122,6 +126,7 @@ export default function App() {
         console.log('year wise data: '+ updatedChartDataYear.datasets[0].data)
 
         setChartDataYear(updatedChartDataYear);
+        handleYear();
         res = chartDataYear;
       })
       .catch(error => {
@@ -146,13 +151,15 @@ export default function App() {
             <button onClick={fetchTimeSeries} >Date Wise</button>
           </li>
           <li className="menu-item">
-            <button onClick={fetchTimeSeriesYear}>Year Wise</button>
+            <button onClick={fetchTimeSeriesYear} >Year Wise</button>
           </li>
         </ul>
       ) : null}
-      {open ? <Bar options={option} data={chartData} className="bar"/> : <Bar options={option} data={chartDataYear} className="bar"/>}
+      {year ? <Bar options={option} data={chartDataYear} className="bar"/> : <Bar options={option} data={chartData}  className="bar"/>}
     </div>
-      {/* <Bar options={option} data={chartData} className="bar"/> */}
+      {/* <Bar options={option} data={chartData} className="bar"/>
+      <Bar options={option} data={chartDataYear} className="barYear"/> */}
+
     </div>
   );
 }

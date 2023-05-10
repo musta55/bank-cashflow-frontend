@@ -16,6 +16,11 @@
   height: 6000rem;
 width: 10000rem;
 }
+
+.barYear {
+  height: 6rem;
+width: 1rem;
+}
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
