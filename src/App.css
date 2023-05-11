@@ -18,8 +18,10 @@ width: 10000rem;
 }
 
 .barYear {
-  height: 6rem;
-width: 1rem;
+  box-sizing: border-box;
+  display: block;
+  height: 400px;
+  width: 800px;
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);

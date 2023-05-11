@@ -9,6 +9,7 @@ const API_ENDPOINT = "http://localhost:5000/api/v1/timeSeries/";
 
 const option = {
   responsive: true,
+  type: 'scale',
   plugins: {
     legend: { position: "chartArea" },
     title: {
@@ -17,18 +18,11 @@ const option = {
     },
   },
 };
-let res;
 
 export default function App() {
   const [open, setOpen] = useState(false);
   const [year, setYear] = useState(false);
 
-  const handleYear = () => {
-    if(year==true)
-    setYear(false);
-    else setYear(true);
-
-  };
 
   const handleOpen = () => {
     setOpen(!open);
@@ -41,12 +35,12 @@ export default function App() {
       {
         label: 'Inflow',
         data: [],
-        backgroundColor: 'green',
+        backgroundColor: '#8150C3',
       },
       {
         label: 'Outflow',
         data: [],
-        backgroundColor: 'blue',
+        backgroundColor: '#5ECAC7',
       },
     ],
   });
@@ -58,12 +52,12 @@ export default function App() {
       {
         label: 'Inflow',
         data: [],
-        backgroundColor: 'green',
+        backgroundColor: '#8150C3',
       },
       {
         label: 'Outflow',
         data: [],
-        backgroundColor: 'blue',
+        backgroundColor: '#5ECAC7',
       },
     ],
   });
@@ -90,10 +84,9 @@ export default function App() {
             },
           ],
         };
-
+        setYear(true);
         setChartData(updatedChartData);
-        res = chartData;
-        handleYear();
+     
       })
       .catch(error => {
         console.error('Error:', error);
@@ -125,9 +118,10 @@ export default function App() {
 
         console.log('year wise data: '+ updatedChartDataYear.datasets[0].data)
 
+        setYear(false);
         setChartDataYear(updatedChartDataYear);
-        handleYear();
-        res = chartDataYear;
+        
+      
       })
       .catch(error => {
         console.error('Error:', error);
@@ -141,10 +135,8 @@ export default function App() {
 
   return (
     <div className="App">
-      <button onClick={fetchTimeSeries}>Get Information</button>
-
       <div className="dropdown">
-      <button onClick={handleOpen}>Options</button>
+      <button onClick={handleOpen}>Currency Flow (Date/Year)</button>
       {open ? (
         <ul className="menu">
           <li className="menu-item">
@@ -155,7 +147,7 @@ export default function App() {
           </li>
         </ul>
       ) : null}
-      {year ? <Bar options={option} data={chartDataYear} className="bar"/> : <Bar options={option} data={chartData}  className="bar"/>}
+      {year ?   <Bar options={option} data={chartData}  className="bar"/>: <Bar options={option} data={chartDataYear} className="barYear"/>}
     </div>
       {/* <Bar options={option} data={chartData} className="bar"/>
       <Bar options={option} data={chartDataYear} className="barYear"/> */}
