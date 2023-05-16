@@ -3,6 +3,7 @@ import { Bar, Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import RadioButton from "./RadioButton";
 import "./Chart.css";
+import { fetchBarService, fetchBarYearService } from "../services/apiService";
 
 Chart.register(...registerables);
 
@@ -88,10 +89,9 @@ export default function BarChart() {
     ],
   });
 
+
   const fetchTimeSeries = (branch) => {
-    console.log("api holo " + API_ENDPOINT + "/" + branch);
-    fetch(API_ENDPOINT + branch)
-      .then((response) => response.json())
+    fetchBarService(branch)
       .then((fetchedData) => {
         let labels = fetchedData.map((data) => data.Date);
         let inflowData = fetchedData.map((data) => data.INFLOW);
@@ -135,14 +135,43 @@ export default function BarChart() {
     return <Line options={option} data={chartDataYear} className="line" />;
   }
 
+  // const fetchTimeSeriesYear = (branch) => {
+  //     fetchBarYearService(branch)
+  //     .then((fetchedData) => {
+  //       let labels = fetchedData.map((data) => data.year);
+  //       let inflowData = fetchedData.map((data) => data.inflow);
+  //       let outflowData = fetchedData.map((data) => data.outflow);
+
+  //       let updatedChartDataYear = {
+  //         ...chartDataYear,
+  //         labels: labels,
+  //         datasets: [
+  //           {
+  //             ...chartDataYear.datasets[0],
+  //             data: inflowData,
+  //           },
+  //           {
+  //             ...chartDataYear.datasets[1],
+  //             data: outflowData,
+  //           },
+  //         ],
+  //       };
+
+  //       console.log("year wise data: " + updatedChartDataYear.datasets[0].data);
+  //       setChartDataYear(updatedChartDataYear);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //     });
+  // };
+
   const fetchTimeSeriesYear = (branch) => {
-    fetch("http://localhost:5000/api/v1/timeSeries/year/" + branch)
-      .then((response) => response.json())
+    fetchBarYearService(branch)
       .then((fetchedData) => {
         let labels = fetchedData.map((data) => data.year);
         let inflowData = fetchedData.map((data) => data.inflow);
         let outflowData = fetchedData.map((data) => data.outflow);
-
+  
         let updatedChartDataYear = {
           ...chartDataYear,
           labels: labels,
@@ -157,7 +186,7 @@ export default function BarChart() {
             },
           ],
         };
-
+  
         console.log("year wise data: " + updatedChartDataYear.datasets[0].data);
         setChartDataYear(updatedChartDataYear);
       })
@@ -165,6 +194,7 @@ export default function BarChart() {
         console.error("Error:", error);
       });
   };
+  
 
   // useEffect(() => {
   //  // fetchTimeSeries();
@@ -172,6 +202,7 @@ export default function BarChart() {
 
   return (
     <div className="BarChart">
+      <h1>Cash Flow Analysis</h1>
       <div className="dropdown">
         <button onClick={handleOpen}>Currency Flow (Date/Year)</button>
         {open ? (
@@ -286,3 +317,4 @@ export default function BarChart() {
     </div>
   );
 }
+
