@@ -7,8 +7,6 @@ import { fetchBarService, fetchBarYearService } from "../services/apiService";
 
 Chart.register(...registerables);
 
-const API_ENDPOINT = "http://localhost:5000/api/v1/timeSeries/";
-
 const option = {
   responsive: true,
   type: "scale",
@@ -92,7 +90,13 @@ export default function BarChart() {
 
   const fetchTimeSeries = (branch) => {
     fetchBarService(branch)
-      .then((fetchedData) => {
+      .then(fetchedData => {
+
+        if (!Array.isArray(fetchedData)) {
+          console.error('Fetched data is not an array:', fetchedData);
+          return;
+        }
+
         let labels = fetchedData.map((data) => data.Date);
         let inflowData = fetchedData.map((data) => data.INFLOW);
         let outflowData = fetchedData.map((data) => data.OUTFLOW);
