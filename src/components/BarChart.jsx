@@ -19,27 +19,10 @@ const option = {
   },
 };
 
-export default function BarChart() {
+const BarChart = () => {
   const [open, setOpen] = useState(false);
   const [showDiv, setShowDiv] = useState(false);
   const [year, setYear] = useState(false);
-
-  const handleRadioChange = (event) => {
-    const selectedValue = event.target.value;
-    if (selectedValue === "year") {
-      setShowDiv(true);
-      setYear(true);
-    } else if (selectedValue === "date") {
-      setShowDiv(true);
-      setYear(false);
-    }
-  };
-
-  const handleOpen = () => {
-    setOpen(!open);
-  };
-
-  // Date wise data
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
@@ -56,7 +39,6 @@ export default function BarChart() {
     ],
   });
 
-  // Year wise data
   const [chartDataYear, setChartDataYear] = useState({
     labels: [],
     datasets: [
@@ -73,7 +55,6 @@ export default function BarChart() {
     ],
   });
 
-  // LineChart
   const [lineChartData, setLineChartData] = useState({
     labels: [],
     datasets: [
@@ -87,22 +68,29 @@ export default function BarChart() {
     ],
   });
 
+  const handleRadioChange = (event) => {
+    const selectedValue = event.target.value;
+    if (selectedValue === "year") {
+      setShowDiv(true);
+      setYear(true);
+    } else if (selectedValue === "date") {
+      setShowDiv(true);
+      setYear(false);
+    }
+  };
 
-  const fetchTimeSeries = (branch) => {
+  const handleOpen = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const fetchData = (branch) => {
     fetchBarService(branch)
-      .then(fetchedData => {
+      .then((fetchedData) => {
+        let labels = fetchedData.map((data) => data.date);
+        let inflowData = fetchedData.map((data) => data.inflow);
+        let outflowData = fetchedData.map((data) => data.outflow);
 
-        if (!Array.isArray(fetchedData)) {
-          console.error('Fetched data is not an array:', fetchedData);
-          return;
-        }
-
-        let labels = fetchedData.map((data) => data.Date);
-        let inflowData = fetchedData.map((data) => data.INFLOW);
-        let outflowData = fetchedData.map((data) => data.OUTFLOW);
-
-        let updatedChartData = {
-          ...chartData,
+        const updatedChartData = {
           labels: labels,
           datasets: [
             {
@@ -115,7 +103,7 @@ export default function BarChart() {
             },
           ],
         };
-        console.log("updates " + Object.keys(updatedChartData.datasets[0]));
+
         setChartData(updatedChartData);
       })
       .catch((error) => {
@@ -123,61 +111,14 @@ export default function BarChart() {
       });
   };
 
-  function FetchDate() {
-    return <Bar options={option} data={chartData} className="bar" />;
-  }
-
-  function FetchYear() {
-    return <Bar options={option} data={chartDataYear} className="barYear" />;
-  }
-
-  function FetchLineChart() {
-    return <Line options={option} data={chartData} className="line" />;
-  }
-
-  function FetchLineChartYear() {
-    return <Line options={option} data={chartDataYear} className="line" />;
-  }
-
-  // const fetchTimeSeriesYear = (branch) => {
-  //     fetchBarYearService(branch)
-  //     .then((fetchedData) => {
-  //       let labels = fetchedData.map((data) => data.year);
-  //       let inflowData = fetchedData.map((data) => data.inflow);
-  //       let outflowData = fetchedData.map((data) => data.outflow);
-
-  //       let updatedChartDataYear = {
-  //         ...chartDataYear,
-  //         labels: labels,
-  //         datasets: [
-  //           {
-  //             ...chartDataYear.datasets[0],
-  //             data: inflowData,
-  //           },
-  //           {
-  //             ...chartDataYear.datasets[1],
-  //             data: outflowData,
-  //           },
-  //         ],
-  //       };
-
-  //       console.log("year wise data: " + updatedChartDataYear.datasets[0].data);
-  //       setChartDataYear(updatedChartDataYear);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //     });
-  // };
-
-  const fetchTimeSeriesYear = (branch) => {
+  const fetchDataYear = (branch) => {
     fetchBarYearService(branch)
       .then((fetchedData) => {
         let labels = fetchedData.map((data) => data.year);
         let inflowData = fetchedData.map((data) => data.inflow);
         let outflowData = fetchedData.map((data) => data.outflow);
-  
-        let updatedChartDataYear = {
-          ...chartDataYear,
+
+        const updatedChartDataYear = {
           labels: labels,
           datasets: [
             {
@@ -190,26 +131,36 @@ export default function BarChart() {
             },
           ],
         };
-  
-        console.log("year wise data: " + updatedChartDataYear.datasets[0].data);
+
         setChartDataYear(updatedChartDataYear);
       })
       .catch((error) => {
         console.error("Error:", error);
       });
   };
-  
 
-  // useEffect(() => {
-  //  // fetchTimeSeries();
-  // }, []);
+  useEffect(() => {
+    if (showDiv && year) {
+      fetchDataYear("dhaka");
+    } else if (showDiv && !year) {
+      fetchData("dhaka");
+    }
+  }, [showDiv, year]);
+
+  const BarChartComponent = ({ data, className }) => {
+    return <Bar options={option} data={data} className={className} />;
+  };
+
+  const LineChartComponent = ({ data, className }) => {
+    return <Line options={option} data={data} className={className} />;
+  };
 
   return (
     <div className="BarChart">
       <h1>Cash Flow Analysis</h1>
       <div className="dropdown">
         <button onClick={handleOpen}>Currency Flow (Date/Year)</button>
-        {open ? (
+        {open && (
           <div>
             <label>
               <input
@@ -230,15 +181,13 @@ export default function BarChart() {
               Date
             </label>
 
-            {showDiv && year && (
+            {showDiv && (
               <div>
-                {/* Year-wise div content */}
                 <div>
                   <button
                     label="Dhaka Branch"
                     onClick={() => {
-                      fetchTimeSeriesYear("dhaka");
-
+                      year ? fetchDataYear("dhaka") : fetchData("dhaka");
                     }}
                   >
                     Dhaka Branch
@@ -246,7 +195,7 @@ export default function BarChart() {
                   <button
                     label="Chittagong Branch"
                     onClick={() => {
-                      fetchTimeSeriesYear("chittagong");
+                      year ? fetchDataYear("chittagong") : fetchData("chittagong");
                     }}
                   >
                     Chittagong Branch
@@ -254,7 +203,7 @@ export default function BarChart() {
                   <button
                     label="Sylhet Branch"
                     onClick={() => {
-                      fetchTimeSeriesYear("sylhet");
+                      year ? fetchDataYear("sylhet") : fetchData("sylhet");
                     }}
                   >
                     Sylhet Branch
@@ -262,63 +211,30 @@ export default function BarChart() {
                   <button
                     label="Rangpur Branch"
                     onClick={() => {
-                      fetchTimeSeriesYear("rangpur");
+                      year ? fetchDataYear("rangpur") : fetchData("rangpur");
                     }}
                   >
                     Rangpur Branch
                   </button>
                 </div>
-                <FetchYear />
-                <FetchLineChartYear />
-              </div>
-            )}
-            {showDiv && !year && (
-              <div>
-                {/* Date-wise div content */}
-                <div>
-                  <button
-                    label="Dhaka Branch"
-                    onClick={() => {
-                      fetchTimeSeries("dhaka");
-                    }}
-                  >
-                    Dhaka Branch 
-                  </button>
-                  <button
-                    label="Chittagong Branch"
-                    onClick={() => {
-                      fetchTimeSeries("chittagong");
-                    }}
-                  >
-                    Chittagong Branch 
-                  </button>
-                  <button
-                    label="Sylhet Branch"
-                    onClick={() => {
-                      fetchTimeSeries("sylhet");
-                    }}
-                  >
-                    Sylhet Branch 
-                  </button>
-                  <button
-                    label="Rangpur Branch "
-                    onClick={() => {
-                      fetchTimeSeries("rangpur");
-                    }}
-                  >
-                    Rangpur Branch 
-                  </button>
-                </div>
-                <FetchDate /> 
-                <FetchLineChart/>
+                {year ? (
+                  <>
+                    <BarChartComponent data={chartDataYear} className="barYear" />
+                    <LineChartComponent data={chartDataYear} className="line" />
+                  </>
+                ) : (
+                  <>
+                    <BarChartComponent data={chartData} className="bar" />
+                    <LineChartComponent data={chartData} className="line" />
+                  </>
+                )}
               </div>
             )}
           </div>
-        ) : null}
-        {/* {year ? <FetchDate /> : <FetchYear />} */}
+        )}
       </div>
-
     </div>
   );
-}
+};
 
+export default BarChart;
